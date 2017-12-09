@@ -27,6 +27,7 @@ class DiscordRPC:
     def send_data(self, op: int, payload: dict):
         payload = json.dumps(payload)
         data = self.sock_writer.write(struct.pack('<ii', op, len(payload)) + payload.encode('utf-8'))
+        yield from self.sock_writer.drain()
         print(data)
 
     async def handshake(self):
