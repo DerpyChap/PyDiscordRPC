@@ -22,7 +22,8 @@ class DiscordRPC:
         print("reading output")
         data = await self.sock_reader.read(1024)
         code, length = struct.unpack('<ii', data[:8])
-        print(f'OP Code: {code}; Length: {length}\nResponse:\n{json.loads(data[8:].decode("utf-8"))}\n')
+        print('OP Code: {}; Length: {}\nResponse:\n{}\n'.format(
+            code, length, json.loads(data[8:].decode('utf-8'))))
 
     def send_data(self, op: int, payload: dict):
         payload = json.dumps(payload)
@@ -40,7 +41,8 @@ class DiscordRPC:
         self.send_data(0, {'v': 1, 'client_id': self.client_id})
         data = await self.sock_reader.read(1024)
         code, length = struct.unpack('<ii', data[:8])
-        print(f'OP Code: {code}; Length: {length}\nResponse:\n{json.loads(data[8:].decode("utf-8"))}\n')
+        print('OP Code: {}; Length: {}\nResponse:\n{}\n'.format(
+            code, length, json.loads(data[8:].decode('utf-8'))))
 
     def send_rich_presence(self, activity):
         current_time = time.time()
@@ -50,7 +52,7 @@ class DiscordRPC:
                 "activity": activity,
                 "pid": os.getpid()
             },
-            "nonce": f'{current_time:.20f}'
+            "nonce": '{:.20f}'.format(current_time)
         }
         print("sending data")
         sent = self.send_data(1, payload)
