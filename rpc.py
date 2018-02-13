@@ -22,7 +22,8 @@ class DiscordRPC:
         print("reading output")
         data = await self.sock_reader.read(1024)
         code, length = struct.unpack('<ii', data[:8])
-        print(f'OP Code: {code}; Length: {length}\nResponse:\n{json.loads(data[8:].decode("utf-8"))}\n')
+        print('OP Code: {}; Length: {}\nResponse:\n{}\n'.format(
+            code, length, json.loads(data[8:].decode('utf-8'))))
 
     def send_data(self, op: int, payload: dict):
         payload = json.dumps(payload)
@@ -40,7 +41,8 @@ class DiscordRPC:
         self.send_data(0, {'v': 1, 'client_id': self.client_id})
         data = await self.sock_reader.read(1024)
         code, length = struct.unpack('<ii', data[:8])
-        print(f'OP Code: {code}; Length: {length}\nResponse:\n{json.loads(data[8:].decode("utf-8"))}\n')
+        print('OP Code: {}; Length: {}\nResponse:\n{}\n'.format(
+            code, length, json.loads(data[8:].decode('utf-8'))))
 
     def send_rich_presence(self, activity):
         current_time = time.time()
@@ -50,7 +52,7 @@ class DiscordRPC:
                 "activity": activity,
                 "pid": os.getpid()
             },
-            "nonce": f'{current_time:.20f}'
+            "nonce": '{:.20f}'.format(current_time)
         }
         print("sending data")
         sent = self.send_data(1, payload)
@@ -62,3 +64,32 @@ class DiscordRPC:
 
     def start(self):
         self.loop.run_until_complete(self.handshake())
+
+if __name__ == '__main__':
+    client_id = '1234567892138470' #Your application's client ID as a string. (This isn't a real client ID)
+    RPC = rpc.DiscordRPC(client_id) #Send the client ID to the rpc module
+    RPC.start() #Start the RPC connection
+
+    current_time = time.time()
+
+    #This is the activity information sent to the client
+    activity = {
+        "state": "This is the state",
+        "details": "Here are some details",
+        "timestamps": {
+            "start": int(current_time)
+        },
+        "assets": {
+            "small_text": "Text for small_image",
+            "small_image": "img_small",
+            "large_text": "Text for large_image",
+            "large_image": "img_large"
+        },
+        "party": {
+            "size": [1, 6]
+        }
+    }
+
+    RPC.send_rich_presence(activity)
+    time.sleep(60)
+    #Presence is set for 60 seconds, afterwards the script will end and the presence will disappear from your profile.
